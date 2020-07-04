@@ -1,0 +1,393 @@
+swagger: "2.0"
+info:
+  description: "ELISa REST API architecture"
+  version: "1.0.0"
+  title: "ELISa REST API"
+  termsOfService: "https://github.com/mikecokina/elisa"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "GPLv3"
+    url: "https://opensource.org/licenses/gpl-3.0"
+
+host: "localhost"
+basePath: "/v1"
+
+tags:
+- name: "binary"
+  description: "Everything about your Binary Star System"
+  externalDocs:
+    description: "Find out more"
+    url: "https://localhost"
+
+schemes:
+- "https"
+
+paths:
+  /binary/plot/orbit:
+    get:
+      tags:
+      - "binary"
+      summary: "Get orbital plotting data for given system"
+      description: ""
+      operationId: "plotBinaryOrbit"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "body"
+        in: "body"
+        description: "system parameters to get orbit data"
+        required: true
+        schema:
+          $ref: "#/definitions/PlotBinarySystemOrbit"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ApiResponsePlotBinarySystemOrbit"
+        "400":
+          description: "Invalid status value"
+      # security:
+      # - petstore_auth:
+      #   - "write:pets"
+      #   - "read:pets"
+
+  /binary/plot/equipotential:
+    get:
+      tags:
+      - "binary"
+      summary: "Get equipotential crossection plotting data for given system"
+      description: ""
+      operationId: "plotBinaryEquipotential"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "body"
+        in: "body"
+        description: "system parameters to get equipotential crossection"
+        required: true
+        schema:
+          $ref: "#/definitions/PlotBinarySystemEquipotential"
+
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ApiResponsePlotBinarySystemEquipotential"
+        "400":
+          description: "Invalid status value"
+
+  /binary/observer/lc:
+    get:
+      tags:
+      - "binary"
+      summary: "Get light curve for given system"
+      description: ""
+      operationId: "binaryLighCurve"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "body"
+        in: "body"
+        description: "system parameters to get light curve"
+        required: true
+        schema:
+          $ref: "#/definitions/BinarySystemLightCurve"
+
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ApiResponsePlotBinarySystemEquipotential"
+        "400":
+          description: "Invalid status value"
+
+
+
+securityDefinitions:
+  petstore_auth:
+    type: "oauth2"
+    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:pets: "modify pets in your account"
+      read:pets: "read your pets"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+
+definitions:
+  BinarySystemStar:
+    type: "object"
+    properties:
+      mass:
+        type: "number"
+        format: "float"
+      surface_potential:
+        type: "number"
+        format: "float"
+      synchronicity:
+        type: "number"
+        format: "float"
+        default: 1.0
+      t_eff:
+        type: "number"
+        format: "float"
+      gravity_darkening:
+        type: "number"
+        format: "float"
+        default: 1.0
+      albedo:
+        type: "number"
+        format: "float"
+        default: 1.0
+      metallicity:
+        type: "number"
+        format: "float"
+        default: 0.0
+
+  BinarySystemSystem:
+      type: "object"
+      properties:
+        inclination:
+          type: "number"
+          format: "float"
+          default: 90.0
+        period:
+          type: "number"
+          format: "float"
+        argument_of_periastron:
+          type: "number"
+          format: "float"
+          default: 0.0
+        gamma:
+          type: "number"
+          format: "float"
+          default: 0.0
+        eccentricity:
+          type: "number"
+          format: "float"
+          default: 0.0
+        primary_minimum_time:
+          type: "number"
+          format: "float"
+          default: 0.0
+        phase_shift:
+          type: "number"
+          format: "float"
+          default: 0.0
+
+  PlotBinarySystemEquipotential:
+    type: "object"
+    properties:
+      binary:
+        type: "object"
+        properties:
+          system:
+            $ref: "#/definitions/BinarySystemSystem"
+          primary:
+            $ref: "#/definitions/BinarySystemStar"
+          secondary:
+            $ref: "#/definitions/BinarySystemStar"
+
+      equipotential:
+        type: "object"
+        properties:
+          plane:
+            type: "string"
+            enum:
+            - "xy"
+            - "yz"
+            - "zx"
+          phase:
+            type: "number"
+            format: "float"
+            default: 0.0
+          components_to_plot:
+            type: "string"
+            enum:
+            - "both"
+            - "primary"
+            - "secondary"
+          colors:
+            type: array
+            items:
+              type: string
+            example: ['b', 'r']
+            default: ['b', 'r']
+
+  PlotBinarySystemOrbit:
+    type: "object"
+    properties:
+
+      binary:
+        type: "object"
+        properties:
+          system:
+            $ref: "#/definitions/BinarySystemSystem"
+          primary:
+            $ref: "#/definitions/BinarySystemStar"
+          secondary:
+            $ref: "#/definitions/BinarySystemStar"
+      orbit:
+        type: "object"
+        properties:
+          start_phase:
+            type: "number"
+            format: "float"
+            default: 0.0
+          stop_phase:
+            type: "number"
+            format: "float"
+            default: 1.0
+          number_of_points:
+            type: "integer"
+            format: "int32"
+            default: 100
+          axis_units:
+            type: "string"
+            default: "solRad"
+          frame_of_reference:
+            type: "string"
+            enum:
+            - "primary"
+            - "barycentric"
+
+  BinarySystemLightCurve:
+    type: "object"
+    properties:
+      binary:
+        type: "object"
+        properties:
+          system:
+            $ref: "#/definitions/BinarySystemSystem"
+          primary:
+            $ref: "#/definitions/BinarySystemStar"
+          secondary:
+            $ref: "#/definitions/BinarySystemStar"
+      observer:
+        type: "object"
+        properties:
+          from_phase:
+            type: "number"
+            format: "float"
+            default: -0.6
+            example: -0.6
+          to_phase:
+            type: "number"
+            format: "float"
+            default: 0.6
+            example: 0.6
+          phase_step:
+            type: "number"
+            format: "float"
+            default: 0.1
+            example: 0.1
+          phases:
+            type: array
+            items:
+              type: number
+            example: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+          normalize:
+            type: "boolean"
+            default: true
+            example: false
+          normalization:
+            type: "string"
+            enum:
+              - "average"
+              - "globa_average"
+              - "maximum"
+              - "global_maximum"
+          passband:
+            type: array
+            items:
+              type: string
+            example: ["Generic.Bessell.V", "Generic.Bessell.R"]
+
+
+  ApiResponsePlotBinarySystemEquipotential:
+    type: "object"
+    properties:
+      data:
+        type: "object"
+        properties:
+          xs:
+            type: array
+            items:
+              type: number
+            example: [0.0, 0.1, 0.2, 0.3, 0.4]
+          ys:
+            type: array
+            items:
+              type: number
+            example: [0.0, 0.1, 0.2, 0.3, 0.4]
+      equipotential:
+        type: "object"
+        properties:
+          plane:
+            type: "string"
+            enum:
+            - "xy"
+            - "yz"
+            - "zx"
+          phase:
+            type: "number"
+            format: "float"
+            default: 0.0
+          components_to_plot:
+            type: "string"
+            enum:
+            - "both"
+            - "primary"
+            - "secondary"
+
+  ApiResponsePlotBinarySystemOrbit:
+    type: "object"
+    properties:
+      data:
+        type: "object"
+        properties:
+          xs:
+            type: array
+            items:
+              type: number
+            example: [0.0, 0.1, 0.2, 0.3, 0.4]
+          ys:
+            type: array
+            items:
+              type: number
+            example: [0.0, 0.1, 0.2, 0.3, 0.4]
+
+      orbit:
+        type: "object"
+        properties:
+          start_phase:
+            type: "number"
+            format: "float"
+            default: 0.0
+          stop_phase:
+            type: "number"
+            format: "float"
+            default: 1.0
+          number_of_points:
+            type: "integer"
+            format: "int32"
+            default: 100
+          axis_units:
+            type: "string"
+            default: "solRad"
+          frame_of_reference:
+            type: "string"
+            enum:
+            - "primary"
+            - "barycentric"
+
+
+
+
+
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
